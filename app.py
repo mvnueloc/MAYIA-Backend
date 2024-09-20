@@ -65,9 +65,42 @@ def is_valid_audio_format(filename):
 def obtener_saldo():
     return jsonify(saldo_disponible)
 
+@app.route('/api/saldo', methods=['PUT'])
+def actualizar_saldo():
+    nuevo_saldo = request.json.get('saldo_disponible')
+    if nuevo_saldo is None:
+        return jsonify({'error': 'Se requiere el campo saldo_disponible'}), 400
+    
+    try:
+        nuevo_saldo = float(nuevo_saldo)
+    except ValueError:
+        return jsonify({'error': 'El saldo debe ser un número válido'}), 400
+
+    saldo_disponible['saldo_disponible'] = nuevo_saldo
+    return jsonify(saldo_disponible), 200
+
 @app.route('/api/transacciones', methods=['GET'])
 def obtener_transacciones():
     return jsonify(transacciones)
+
+@app.route('/api/transacciones', methods=['POST'])
+def agregar_transaccion():
+    nueva_transaccion = request.json
+    campos_requeridos = ['tipo', 'descripcion', 'monto', 'fecha']
+    
+    for campo in campos_requeridos:
+        if campo not in nueva_transaccion:
+            return jsonify({'error': f'Falta el campo requerido: {campo}'}), 400
+    
+    try:
+        nueva_transaccion['monto'] = float(nueva_transaccion['monto'])
+    except ValueError:
+        return jsonify({'error': 'El monto debe ser un número válido'}), 400
+    
+    nueva_transaccion['id'] = max(t['id'] for t in transacciones) + 1
+    transacciones.append(nueva_transaccion)
+    
+    return jsonify(nueva_transaccion), 201
 
 @app.route('/api/contactos_recurrentes', methods=['GET'])
 def obtener_contactos_recurrentes():
