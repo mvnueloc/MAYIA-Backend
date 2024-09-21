@@ -110,6 +110,18 @@ def obtener_contactos_recurrentes():
 def obtener_servicios_disponibles():
     return jsonify(servicios_disponibles)
 
+@app.route('/api/transacciones/<int:id>', methods=['DELETE'])
+def borrar_transaccion(id):
+    global transacciones
+    transaccion_a_borrar = next((t for t in transacciones if t['id'] == id), None)
+
+    if transaccion_a_borrar is None:
+        return jsonify({'error': 'Transacción no encontrada'}), 404
+    
+    transacciones = [t for t in transacciones if t['id'] != id]
+    return jsonify({'message': 'Transacción borrada exitosamente'}), 200
+
+
 @app.route('/transcribe', methods=['POST'])
 def transcribe_audio():
     if 'audio' not in request.files:
